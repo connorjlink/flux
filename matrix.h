@@ -60,10 +60,27 @@ namespace fx
 		return out;
 	}
 
-	// TODO: implement specializations for other matrix sizes
-	template<std::size_t M = 4, typename T = platform_type>
-		requires (M == 3)
+	template<std::size_t M, typename T>
 	constexpr T determinant(const mat<M, M, T>& matrix)
+	{
+		static_assert(false, "Determinant argument is of an unsupported size.");
+	}
+
+	// NOTE: overloading because partial function template specialization not allowed
+	template<typename T = platform_type>
+	constexpr T determinant(const mat<2, 2, T>& matrix)
+	{
+		const auto forward = matrix[0][0] * matrix[1][1];
+		const auto backward = matrix[0][1] * matrix[1][0];
+
+		const auto difference = forward - backward;
+
+		return difference;
+	}
+
+	// NOTE: overloading because partial function template specialization not allowed
+	template<typename T = platform_type>
+	constexpr T determinant(const mat<3, 3, T>& matrix)
 	{
 		const auto forward = _forward_diagonals(matrix);
 		const auto backward = _backward_diagonals(matrix);
@@ -71,6 +88,39 @@ namespace fx
 		const auto difference = total(forward) - total(backward);
 
 		return difference;
+	}
+
+	// NOTE: overloading because partial function template specialization not allowed
+	template<typename T = platform_type>
+	constexpr T determinant(const mat<4, 4, T>& matrix)
+	{
+		auto det = T{ 0 };
+
+		for (std::size_t i = 0; i < 4; ++i)
+		{
+			mat<3, 3, T> minor{};
+
+			for (std::size_t j = 1; j < 4; ++j)
+			{
+				std::size_t l = 0;
+
+				for (std::size_t k = 0; k < 4; ++k)
+				{
+					if (k == i) continue;
+
+					minor[j - 1][l] = matrix[j][k];
+					++l;
+				}
+			}
+
+			// equivalent to `((i % 2 == 0) ? 1 : -1)`
+			const auto sign = 1 - ((i & 1) << 1);
+			const auto cofactor = sign * matrix[0][i] * determinant(minor);
+
+			det += cofactor;
+		}
+
+		return det;
 	}
 
 	template<std::size_t M = 4, typename T = platform_type>
@@ -225,12 +275,12 @@ namespace fx
 		const auto yaxis = normalize(cross(zaxis, xaxis));
 
 		return mat<M, M, T>
-		{ std::array<std::array<T, M>, M>{
-			std::array<T, M>{ xaxis[0], yaxis[0], zaxis[0], 0, },
-			std::array<T, M>{ xaxis[1], yaxis[1], zaxis[1], 0, },
-			std::array<T, M>{ xaxis[2], yaxis[2], zaxis[2], 0, },
-			std::array<T, M>{-dot(xaxis, eye), -dot(yaxis, eye), -dot(zaxis, eye), 1, },
-		} };
+		{
+			std::array<T, M>{ xaxis[0],         yaxis[0],         zaxis[0],         0 },
+			std::array<T, M>{ xaxis[1],         yaxis[1],         zaxis[1],         0 },
+			std::array<T, M>{ xaxis[2],         yaxis[2],         zaxis[2],         0 },
+			std::array<T, M>{ -dot(xaxis, eye), -dot(yaxis, eye), -dot(zaxis, eye), 1 },
+		};
 	}
 }
 
