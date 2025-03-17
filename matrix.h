@@ -98,7 +98,7 @@ namespace fx
 
 		for (std::size_t i = 0; i < 4; ++i)
 		{
-			mat<3, 3, T> minor{};
+			mat<3, 3, T> minors{};
 
 			for (std::size_t j = 1; j < 4; ++j)
 			{
@@ -108,14 +108,14 @@ namespace fx
 				{
 					if (k == i) continue;
 
-					minor[j - 1][l] = matrix[j][k];
+					minors[j - 1][l] = matrix[j][k];
 					++l;
 				}
 			}
 
 			// equivalent to `((i % 2 == 0) ? 1 : -1)`
 			const auto sign = 1 - ((i & 1) << 1);
-			const auto cofactor = sign * matrix[0][i] * determinant(minor);
+			const auto cofactor = sign * matrix[0][i] * determinant(minors);
 
 			det += cofactor;
 		}
