@@ -8,6 +8,9 @@ import std;
 
 #include <Windows.h>
 
+// test.cpp
+// (c) 2025 Connor J. Link. All Rights Reserved.
+
 int main(int argc, char** argv)
 {
 #define VALIDATION_ERROR(x) MessageBoxA(NULL, x, "Validation Error", MB_OK)
