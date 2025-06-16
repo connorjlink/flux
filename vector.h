@@ -80,14 +80,36 @@ namespace fx
 		return result;
 	}
 
-	template<std::size_t M = 4, typename T = platform_type, typename U>
+
+	// unary reduction operation
+	template<typename U, std::size_t M = 4, typename T = platform_type>
+		requires requires { U{}(T{}); }
+	constexpr vec<M, T> _accumulate(const vec<M, T>& vector)
+	{
+		vec<M, T> out{};
+
+		auto u = U{};
+
+		for (auto i = 0; i < M; i++)
+		{
+			out[i] = u(vector[i]);
+		}
+
+		return out;
+	}
+
+	// binary reduction operation
+	template<typename U, std::size_t M = 4, typename T = platform_type>
+		requires requires { U{}(T{}, T{}); }
 	constexpr vec<M, T> _accumulate(const vec<M, T>& vector1, const vec<M, T>& vector2)
 	{
 		vec<M, T> out{};
 
+		auto u = U{};
+
 		for (auto i = 0; i < M; i++)
 		{
-			out[i] = U{}(vector1[i], vector2[i]);
+			out[i] = u(vector1[i], vector2[i]);
 		}
 
 		return out;
@@ -97,21 +119,28 @@ namespace fx
 	template<std::size_t M = 4, typename T = platform_type>
 	constexpr vec<M, T> add(const vec<M, T>& vector1, const vec<M, T>& vector2)
 	{
-		return _accumulate<M, T, std::plus<T>>(vector1, vector2);
+		return _accumulate<std::plus<T>, M, T>(vector1, vector2);
 	}
 
 	// element-wise difference of all components of two vectors
 	template<std::size_t M = 4, typename T = platform_type>
 	constexpr vec<M, T> subtract(const vec<M, T>& vector1, const vec<M, T>& vector2)
 	{
-		return _accumulate<M, T, std::minus<T>>(vector1, vector2);
+		return _accumulate<std::minus<T>, M, T>(vector1, vector2);
 	}
 
 	// element-wise product of all components of two vectors
 	template<std::size_t M = 4, typename T = platform_type>
 	constexpr vec<M, T> multiply(const vec<M, T>& vector1, const vec<M, T>& vector2)
 	{
-		return _accumulate<M, T, std::multiplies<T>>(vector1, vector2);
+		return _accumulate<std::multiplies<T>, M, T>(vector1, vector2);
+	}
+
+	// element-wise division of all components of two vectors
+	template<std::size_t M = 4, typename T = platform_type>
+	constexpr vec<M, T> divide(const vec<M, T>& vector1, const vec<M, T>& vector2)
+	{
+		return _accumulate<std::divides<T>, M, T>(vector1, vector2);
 	}
 
 	// element-wise summation of all components of a vector
