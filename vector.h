@@ -4,6 +4,9 @@
 #include "base.h"
 #include "matrix.h"
 
+#include <numeric>
+#include <algorithm>
+
 // vector.h
 // (c) 2025 Connor J. Link. All Rights Reserved.
 
